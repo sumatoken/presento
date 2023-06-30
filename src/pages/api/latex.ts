@@ -76,23 +76,6 @@ const compileLaTeX = async (documentPath: string): Promise<string> => {
   return "/tmp/document.pdf";
 };
 
-const generateHeader = async (context: string) => {
-  const defaultHeader = `\\title{Empathy Mapping for Binder App}
-        \\subtitle{Understanding our Users}
-        \\date{\\today}
-        \\author{Mohammed Bermime}
-        \\institute{}`;
-  const completion = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: `Based on the context below moodify the following Latex code (make sure to escape using backslashes):
-      ${defaultHeader}.
-      Context: ${context}`,
-    max_tokens: 1000,
-  });
-
-  return { text: completion.data.choices[0].text as string };
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -110,34 +93,9 @@ export default async function handler(
     slides: organizeSlides(slides),
   });
   console.log("document", document);
-  return document;
+  res.status(200).json({ document });
 
-  /* let document = `
-\\title{Empathy Mapping for Binder App}
-\\subtitle{Understanding our Users}
-\\date{\\today}
-\\author{Mohammed Bermime}
-\\institute{}
-\\begin{document}
-\\maketitle
-\\begin{frame}{Table of contents}
-  \\setbeamertemplate{section in toc}[sections numbered]
-  \\tableofcontents%[hideallsubsections]
-\\end{frame}
-\\section[Intro]{Introduction}
-\\begin{frame}[fragile]{Introduction}
-In this presentation, we will discuss the empathy mapping of our two user types - Businesses and Customers.
-\\end{frame}
-\\section{Empathy Map for Businesses}
-\\begin{frame}{Think and Feel}
-Concerned about reaching more customers, excited about the potential for growth, worried about maintaining customer loyalty, curious about digital marketing and its benefits.
-\\end{frame}`;
-
-  const { text } = await generateHeader(
-    "During the IT presentation, the speaker demonstrated cutting-edge technologies and showcased their practical applications in real-world scenarios. The audience was captivated by the insightful analysis and left with a deeper understanding of the potential impact of emerging IT trends. My name is Said Hamid from the univerity of Ben M'Sik."
-  );
-  document = `${preamble}\n${text}\n\\begin{document}\\maketitle\n\\textbf{Hello World!}${postamble}`;
-
+  /* 
   const latexPath = await writeLatexDocument(document);
 
   try {

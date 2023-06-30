@@ -1,17 +1,6 @@
 import { z } from "zod";
 import { procedure, router } from "../trpc";
 import { openai } from "../../lib/openai";
-import { exec } from "child_process";
-import fs, { promises as fsPromises } from "fs";
-
-const preamble = `
-  \\documentclass{article}
-  \\usepackage{amsmath}
-  \\begin{document}
-  `;
-const postamble = `
-  \\end{document}
-  `;
 
 export const latexRouter = router({
   hello: procedure.query(async (opts) => {

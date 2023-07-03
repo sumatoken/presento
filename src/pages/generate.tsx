@@ -1,9 +1,9 @@
 import Nav from "@/components/nav";
 import Button from "@/components/ui/Button";
+import SlideInputGroup from "@/components/ui/SlideInputGroup";
 import SlideInput from "@/components/ui/slideInput";
 import { trpc } from "@/utils/trpc";
 import { useState } from "react";
-import { late } from "zod";
 
 export default function GeneratePage() {
     const latex = trpc.latex.generatePDF.useMutation()
@@ -11,13 +11,13 @@ export default function GeneratePage() {
         context: string,
         prompt: string,
     }[]>([])
-    const [numberOfSlides, setNumberOfSlides] = useState(3)
+    const [numberOfSlides, setNumberOfSlides] = useState(4)
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
         const { value } = e.target;
         const name = e.target.name as "context" | "prompt";
 
         setInputs((prevInputs) => {
-            const newInputs = [...(prevInputs || [])];
+            const newInputs = [...(prevInputs)];
             if (!newInputs[index]) {
                 newInputs[index] = { context: "", prompt: "" };
             }
@@ -46,18 +46,10 @@ export default function GeneratePage() {
             </div>
             {
                 [...Array(numberOfSlides)].map((_, index) =>
-                    <div className="w-full p-4 flex flex-row justify-around items-center" key={index}>
-                        <SlideInput description="This section should include meta-data (Title, author, institution...)"
-                            name="context"
-                            value={inputs[index]?.context}
-                            onChange={e => handleChange(e, index)} />
-                        <SlideInput description="This section should include the overall subject being discussed in the presentation."
-                            name="prompt"
-                            value={inputs[index]?.prompt}
-                            onChange={e => handleChange(e, index)} />
-                    </div>
+                    <SlideInputGroup key={index} index={index} inputs={inputs} handleChange={handleChange} />
                 )
             }
+
             <div className="p-4 flex flex-row gap-12 justify-center items-center  ">
                 <Button value="Back" variant="back" />
                 <Button value="Next" variant="next" onClick={e => handleSubmit(e)} />

@@ -1,7 +1,6 @@
 import { openai } from "@/lib/openai";
 import fs from "fs";
 import { NextApiRequest, NextApiResponse } from "next";
-import { exit } from "process";
 import { promisify } from "util";
 const exec = promisify(require("child_process").exec);
 
@@ -93,9 +92,7 @@ export default async function handler(
     slides: organizeSlides(slides),
   });
   console.log("document", document);
-  res.status(200).json({ document });
-
-  /* 
+  return;
   const latexPath = await writeLatexDocument(document);
 
   try {
@@ -107,5 +104,5 @@ export default async function handler(
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Failed to generate PDF" });
-   } */
+  }
 }

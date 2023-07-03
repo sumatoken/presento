@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 import { procedure, router } from "../trpc";
 import { openai } from "../../lib/openai";
 
@@ -6,7 +6,12 @@ export const latexRouter = router({
   generatePDF: procedure
     .input(
       z.object({
-        slides: z.array(z.string()),
+        slides: z.array(
+          z.object({
+            context: z.string(),
+            prompt: z.string(),
+          })
+        ),
       })
     )
     .mutation(async (opts) => {

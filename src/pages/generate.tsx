@@ -1,11 +1,14 @@
+import { useState } from "react";
 import Nav from "@/components/nav";
 import Button from "@/components/ui/Button";
 import SlideInputGroup from "@/components/ui/SlideInputGroup";
 import { trpc } from "@/utils/trpc";
-import { useState } from "react";
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+
 
 export default function GeneratePage() {
     const latex = trpc.latex.generatePDF.useMutation()
+    const [parent] = useAutoAnimate()
     const [numberOfSlides, setNumberOfSlides] = useState(3) // because counting starts at 0
     const [inputs, setInputs] = useState<{
         context: string,
@@ -42,6 +45,7 @@ export default function GeneratePage() {
         }
         setSlide([slide - 1, -1])
     }
+
     return (
         <div>
             <Nav />
@@ -55,7 +59,9 @@ export default function GeneratePage() {
                     Starting of with the context of the presentation:
                 </span>
             </div>
-            <SlideInputGroup key={slide} index={slide} value={inputs[slide] || { context: "", prompt: "" }} handleChange={handleChange} />
+            <div ref={parent}>
+                <SlideInputGroup key={slide} index={slide} value={inputs[slide] || { context: "", prompt: "" }} handleChange={handleChange} />
+            </div>
 
             <div className="p-4 flex flex-row gap-12 justify-center items-center  ">
                 <Button value="Back" variant="back" onClick={goToPreviousSlide} />

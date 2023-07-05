@@ -4,7 +4,12 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { promisify } from "util";
 const exec = promisify(require("child_process").exec);
 
-const generateLatexTemplate = (slides: string[]) => {
+interface Slides {
+  context: string;
+  prompt: string;
+}
+
+const generateLatexTemplate = () => {
   const preamble = `\\documentclass[10pt,xcolor=dvipsnames]{beamer}
 \\usetheme[progressbar=frametitle]{metropolis}
 \\usepackage{appendixnumberbeamer}
@@ -35,10 +40,12 @@ const generateLatexTemplate = (slides: string[]) => {
   return document;
 };
 
-const organizeSlides = (slides: string[]) => {
+const organizeSlides = (slides: Slides[]) => {
   let content = "";
   for (let i = 0; i < slides.length; i++) {
-    content += `Slide ${i + 1}` + slides[i] + "\n";
+    content += `Slide ${i + 1}\nContext: ${slides[i].context}\nPrompt:${
+      slides[i].prompt
+    }\n`;
   }
   return content;
 };
@@ -54,9 +61,17 @@ const generateLatex = async ({
     prompt: `You're an agent specialized in generating presentations using Latex. You are given the following template: ${template} and the following slides: ${slides}. Generate the Latex document.`,
     max_tokens: 1000,
   });
-  return completion.data.choices[0].text as string;
+  return completion.data?.choices[0].text as string;
 };
 
+const testCompletion = async () => {
+  const completion = await openai.createCompletion({
+    model: "text-davinci-003",
+    prompt: "This is a test",
+    max_tokens: 5,
+  });
+  return completion.data?.choices[0].text as string;
+};
 const writeLatexDocument = async (document: string) => {
   const tempFilePath = "/tmp/document.tex";
   fs.writeFileSync(tempFilePath, document);
@@ -85,14 +100,15 @@ export default async function handler(
   }
 
   const { slides } = req.body;
-  console.log("slides", slides);
-  const template = generateLatexTemplate(slides);
+  console.log("testCompletion", await testCompletion());
+  res.status(200).json({ testCompletion });
+  return;
+  const template = generateLatexTemplate();
   const document = await generateLatex({
     template,
     slides: organizeSlides(slides),
   });
   console.log("document", document);
-  return;
   const latexPath = await writeLatexDocument(document);
 
   try {

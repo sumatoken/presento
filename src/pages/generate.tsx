@@ -8,7 +8,9 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 export default function GeneratePage() {
     const latex = trpc.latex.generatePDF.useMutation()
-    const [parent] = useAutoAnimate()
+    const [parent] = useAutoAnimate({
+        duration: 100,
+    })
     const [numberOfSlides, setNumberOfSlides] = useState(0) // because counting starts at 0
     const [inputs, setInputs] = useState<{
         context: string,
